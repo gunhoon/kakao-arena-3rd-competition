@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import csv
 import fire
 import numpy as np
 
@@ -69,6 +70,22 @@ class ArenaEvaluator:
             print(f"Music nDCG: {music_ndcg:.6}")
             print(f"Tag nDCG: {tag_ndcg:.6}")
             print(f"Score: {score:.6}")
+        except Exception as e:
+            print(e)
+
+    def save_eval(self, gt_fname, rec_fname, out_fname, dataset):
+        try:
+            music_ndcg, tag_ndcg, score = self._eval(gt_fname, rec_fname)
+            print(f"Music nDCG: {music_ndcg:.6}")
+            print(f"Tag nDCG: {tag_ndcg:.6}")
+            print(f"Score: {score:.6}")
+
+            row = [f"{dataset}", f"{music_ndcg:.6}", f"{tag_ndcg:.6}", f"{score:.6}"]
+
+            with open(out_fname, "a", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(row)
+
         except Exception as e:
             print(e)
 

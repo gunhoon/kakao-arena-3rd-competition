@@ -10,6 +10,9 @@ from arena_util import write_json
 
 
 class ArenaSplitter:
+    def __init__(self, random_seed=777):
+        self._random_seed = random_seed
+
     def _split_data(self, playlists):
         tot = len(playlists)
         train = playlists[:int(tot*0.80)]
@@ -38,9 +41,16 @@ class ArenaSplitter:
                 q_pl[i][col] = list(np.array(q_pl[i][col])[mask])
                 a_pl[i][col] = list(np.array(a_pl[i][col])[np.invert(mask)])
 
+                # 리더보드용 test.json, val.json과 동일하게 만들기 위해
+                # songs이 있는 경우, playlist의 title 삭제한다.
+                if col == 'songs':
+                    q_pl[i]['plylst_title'] = ''
+
         return q_pl, a_pl
 
     def _mask_data(self, playlists):
+        np.random.seed(self._random_seed)
+
         playlists = copy.deepcopy(playlists)
         tot = len(playlists)
         song_only = playlists[:int(tot * 0.3)]
@@ -71,7 +81,7 @@ class ArenaSplitter:
         return q, a
 
     def run(self, fname):
-        random.seed(777)
+        random.seed(self._random_seed)
 
         print("Reading data...\n")
         playlists = load_json(fname)
@@ -88,6 +98,8 @@ class ArenaSplitter:
 
         print("Masked val...")
         val_q, val_a = self._mask_data(val)
+
+        print("Writing data...")
         write_json(val_q, "questions/val.json")
         write_json(val_a, "answers/val.json")
 
