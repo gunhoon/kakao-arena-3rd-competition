@@ -2,6 +2,7 @@ import argparse
 import csv
 import os
 import subprocess
+import tarfile
 import pandas as pd
 
 
@@ -76,6 +77,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--count', type=int, default=1, help='loop count')
     args = parser.parse_args()
-
     print(args)
+
+    # github 용량 제한으로 song_meta.json은 압축되어 있음.
+    if not os.path.isfile('res/song_meta.json'):
+        if os.path.isfile('res/song_meta.tar.gz'):
+            print("Extracting song_meta.tar.gz...")
+            tar = tarfile.open('res/song_meta.tar.gz')
+            tar.extractall(path='res')
+            tar.close()
+
     main(args.count)
