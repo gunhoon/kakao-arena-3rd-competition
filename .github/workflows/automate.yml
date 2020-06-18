@@ -1,0 +1,81 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Test Automation
+
+# the GitHub event that triggers the workflow
+on:
+  push:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "automate"
+  automate:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Checkout data files
+    - name: Checkout data files
+      uses: actions/checkout@v2
+      with:
+        repository: gunhoon/kakao-arena-3rd-data
+        token: ${{ secrets.GUNHOON_PAT }} 
+        path: res
+
+
+    # Set up Python 3.7
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    # Install dependencies from requirements.txt
+    - name: Upgrade pip and install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+
+
+    # Checkout khaiii v0.4
+    - name: Checkout khaiii v0.4
+      uses: actions/checkout@v2
+      with:
+        repository: kakao/khaiii
+        ref: v0.4
+        path: khaiii
+
+    # Restore hunter cache
+    - name: Restore hunter cache for building khaiii v0.4
+      uses: actions/cache@v1
+      with:
+        path: ~/.hunter
+        key: ${{ runner.os }}-hunter
+
+    # Build khaiii
+    - name: Build khaiii v0.4
+      run: |
+        python -m pip install -r requirements.txt
+        mkdir build
+        cd build
+        cmake ..
+        make package_python
+        pip install ./package_python
+      working-directory: khaiii
+
+
+    # Run 1) Runs a test automation script
+    - name: Run a automate.py script
+      run: python automate.py --count=1
+
+    # Run 2) Upload automate.csv file
+    - name: Upload the score file (automate.csv)
+      uses: actions/upload-artifact@v2
+      with:
+        name: automate
+        path: automate.csv
