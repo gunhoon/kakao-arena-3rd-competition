@@ -163,8 +163,8 @@ class PreferenceData:
             for sid in p['songs']:
                 if s_counter[sid] > 2:
                     s_table.append((p['id'], sid, 1))
-                #elif s_counter[sid] > 1:
-                #    e_table.append((p['id'], sid, 1))
+                elif s_counter[sid] > 1:
+                    e_table.append((p['id'], sid, 1))
 
             # tags
             for tag in p['tags']:
