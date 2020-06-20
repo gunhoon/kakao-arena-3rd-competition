@@ -17,7 +17,7 @@ class Victoria:
 
 
     def fit(self, train, val):
-        #self._find_issue_song(train)
+        self._find_issue_song(train)
         self._find_popular_tag(train)
 
         self._main_model.fit(train, val)
@@ -74,7 +74,7 @@ class Victoria:
         return updt_date
 
 
-    def _find_popular_tag(self, train, topk=200):
+    def _find_popular_tag(self, train, topk=1000):
         t_c = Counter()
 
         for p in train:
