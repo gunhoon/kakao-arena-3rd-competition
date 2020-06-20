@@ -14,7 +14,7 @@ class Victoria:
 
 
     def fit(self, train, val):
-        #self._find_issue_song(train)
+        self._find_issue_song(train)
 
         self._main_model.fit(train, val)
         self._fall_model.fit(train)
