@@ -1,16 +1,17 @@
 from collections import Counter
 
 from model.fallback import Fallback
+from model.matrix_factorization import MatrixFactorization
 
 
 class Victoria:
     def __init__(self, song_meta_json, song_topk=200, tag_topk=20):
-        self._main_model = Fallback(song_topk, tag_topk)
+        self._main_model = MatrixFactorization(song_meta_json, song_topk, tag_topk)
         self._fall_model = Fallback(song_topk, tag_topk)
 
 
     def fit(self, train, val):
-        self._main_model.fit(train)
+        self._main_model.fit(train, val)
         self._fall_model.fit(train)
 
 
