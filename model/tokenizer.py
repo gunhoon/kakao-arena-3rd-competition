@@ -1,21 +1,32 @@
+import re
+
 from khaiii import KhaiiiApi
 
 
 class Tokenizer:
     def __init__(self):
         self._api = KhaiiiApi()
+        # 불용어 정의
+        self._stopwords = ['말', '곡', '때', '음악', '노래',
+                'a', 'an', 'the', 'in', 'on', 'at', 'by', 'of']
 
 
     def tokenize(self, sentence):
+        # 영어는 소문자로, 그리고 숫자/영어/한글을 제외한 특수문자 제거(ㅋ 포함)
+        clean_sentence = re.sub('[^0-9a-z가-힣]', ' ', sentence.lower())
+
         morphs = []
         try:
-            for word in self._api.analyze(sentence):
+            for word in self._api.analyze(clean_sentence):
                 morphs.extend(self._word_tokenize(word))
         except:
             morphs.clear()
             print('[WARNING] Khaiii can not tokenize...({})'.format(sentence))
 
-        return morphs
+        # 불용어 제거
+        keyword = {lex for lex, _ in morphs if not lex in self._stopwords}
+
+        return list(keyword)
 
 
     def _word_tokenize(self, word):

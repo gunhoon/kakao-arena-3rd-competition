@@ -173,12 +173,8 @@ class PreferenceData:
 
             # keyword
             if len(p['plylst_title']) > 0:
-                k_c = Counter()
-
                 keyword = api.tokenize(p['plylst_title'])
-                for k, v in keyword:
-                    k_c.update([k])
-                for k, v in k_c.items():
+                for k in keyword:
                     k_table.append((p['id'], k, 1))
 
             # detail genre
