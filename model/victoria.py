@@ -1,3 +1,4 @@
+import re
 from collections import Counter
 
 from model.fallback import Fallback
@@ -12,9 +13,12 @@ class Victoria:
         self._issue_song = set() # 예외처리를 위해 발매일자가 잘못된 곡 저장
         self._issue_date = {song['id'] : song['issue_date'] for song in song_meta_json}
 
+        self._popular_tag = []
+
 
     def fit(self, train, val):
         #self._find_issue_song(train)
+        self._find_popular_tag(train)
 
         self._main_model.fit(train, val)
         self._fall_model.fit(train)
@@ -30,7 +34,7 @@ class Victoria:
             _, t_pred = self._fall_model.predict(playlist)
 
         s_rec = self._rearrange_song(s_pred, playlist)
-        t_rec = [k for k, v in t_pred]
+        t_rec = self._rearrange_tag(t_pred, playlist)
 
         return s_rec, t_rec
 
@@ -68,3 +72,33 @@ class Victoria:
                     playlist['updt_date'][8:10]
 
         return updt_date
+
+
+    def _find_popular_tag(self, train, topk=200):
+        t_c = Counter()
+
+        for p in train:
+            t_c.update(p['tags'])
+
+        for tag, _ in t_c.most_common(topk):
+            self._popular_tag.append(tag)
+
+
+    def _rearrange_tag(self, t_pred, playlist):
+        t_rec = []
+
+        if len(playlist['plylst_title']) > 0:
+            for tag in self._popular_tag:
+                if re.search(tag, playlist['plylst_title']):
+                    t_rec.append(tag)
+
+        if len(t_rec) > 3:
+            t_rec = t_rec[:3]
+
+        t_set = set(t_rec)
+
+        for tag, _ in t_pred:
+            if tag not in t_set:
+                t_rec.append(tag)
+
+        return t_rec
