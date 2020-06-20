@@ -61,6 +61,14 @@ class Tokenizer:
             # 어근
             elif morph.tag == 'XR':
                 morphs.append((morph.lex, morph.tag))
+
+            # 동사 : 2자리 이상만
+            elif morph.tag == 'VV' and len(morph.lex) > 1:
+                morphs.append((morph.lex, morph.tag))
+            # 형용사 : 2자리 이상만
+            elif morph.tag == 'VA' and len(morph.lex) > 1:
+                morphs.append((morph.lex, morph.tag))
+
             # 숫자 : 2자리 이상만
             elif morph.tag == 'SN' and len(morph.lex) > 1:
                 morphs.append((morph.lex, morph.tag))
