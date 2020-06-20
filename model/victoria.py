@@ -5,7 +5,7 @@ from model.matrix_factorization import MatrixFactorization
 
 
 class Victoria:
-    def __init__(self, song_meta_json, song_topk=200, tag_topk=20):
+    def __init__(self, song_meta_json, song_topk=300, tag_topk=20):
         self._main_model = MatrixFactorization(song_meta_json, song_topk, tag_topk)
         self._fall_model = Fallback(song_topk, tag_topk)
 
