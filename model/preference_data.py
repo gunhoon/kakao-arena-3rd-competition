@@ -78,10 +78,10 @@ class PreferenceData:
             t_c.update(p['tags'])
 
         s_train, t_train, k_train, e_train, g_train = \
-                _preference_table(train, s_c, t_c)
+                self._preference_table(train, s_c, t_c)
 
         s_val, t_val, k_val, e_val, g_val = \
-                _preference_table(val, s_c, t_c)
+                self._preference_table(val, s_c, t_c)
 
         # song, tag, keyword, extenstion, genre of val
         s_val_df = pd.DataFrame(s_val, columns =['plylst_id', 'sid', 'preference'])
