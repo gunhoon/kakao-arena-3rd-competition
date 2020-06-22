@@ -161,7 +161,7 @@ class PreferenceData:
         for p in playlists:
             # songs
             for sid in p['songs']:
-                if s_counter[sid] > 2:
+                if s_counter[sid] > 3:
                     s_table.append((p['id'], sid, 1))
                 elif s_counter[sid] > 1:
                     e_table.append((p['id'], sid, 1))

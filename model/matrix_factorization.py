@@ -11,7 +11,7 @@ class MatrixFactorization:
         self._s_topk = song_topk
         self._t_topk = tag_topk
 
-        self._s_model = AlternatingLeastSquares(factors=1024)
+        self._s_model = AlternatingLeastSquares(factors=1300)
         self._t_model = AlternatingLeastSquares(factors=310)
 
         self._data = PreferenceData(song_meta_json)
