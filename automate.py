@@ -6,7 +6,7 @@ import tarfile
 import pandas as pd
 
 
-def main(count):
+def main(count, start):
     out_fname = 'automate.csv'
     csv_header = ['dataset', 'Music nDCG', 'Tag nDCG', 'Score']
 
@@ -16,6 +16,8 @@ def main(count):
 
     # 10개의 dataset을 만들어 성능 평가
     random_seed = [777, 710, 720, 730, 740, 750, 760, 770, 780, 790]
+    if start < len(random_seed):
+        random_seed = random_seed[start:]
     if count < len(random_seed):
         random_seed = random_seed[0:count]
 
@@ -76,6 +78,7 @@ def main(count):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--count', type=int, default=1, help='loop count')
+    parser.add_argument('--start', type=int, default=0, help='start index')
     args = parser.parse_args()
     print(args)
 
@@ -87,4 +90,4 @@ if __name__ == '__main__':
             tar.extractall(path='res')
             tar.close()
 
-    main(args.count)
+    main(args.count, args.start)
