@@ -11,8 +11,8 @@ class MatrixFactorization:
         self._s_topk = song_topk
         self._t_topk = tag_topk
 
-        self._s_model = AlternatingLeastSquares(factors=1300)
-        self._t_model = AlternatingLeastSquares(factors=310)
+        self._s_model = AlternatingLeastSquares(factors=1350)
+        self._t_model = AlternatingLeastSquares(factors=420)
 
         self._data = PreferenceData(song_meta_json)
 
@@ -33,9 +33,9 @@ class MatrixFactorization:
         user_tags_csr = user_item_csr
 
         print("Training song model...")
-        self._s_model.fit(user_song_csr.T * 160)
+        self._s_model.fit(user_song_csr.T * 150)
         print("Training tag model...")
-        self._t_model.fit(user_tags_csr.T * 40)
+        self._t_model.fit(user_tags_csr.T * 65)
 
         # Configure song only model
         self._s_model.user_factors = self._s_model.user_factors[:val_len]
