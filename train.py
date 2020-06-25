@@ -21,14 +21,14 @@ def main(song_meta_fname, train_fname, question_fname):
     model.fit(train, question)
 
     print('Saving the model...')
-    with open('victoria.pickle', 'wb') as f:
+    with open('victoria.pkl', 'wb') as f:
         pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     print('Printing the model size...')
     try:
-        print(os.path.getsize('victoria.pickle'))
+        print(os.path.getsize('victoria.pkl'))
     except OSError:
-        print('No victoria.pickle file')
+        print('No victoria.pkl file')
 
 
 if __name__ == '__main__':

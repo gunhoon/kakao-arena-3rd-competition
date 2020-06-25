@@ -94,9 +94,9 @@ jobs:
         name: results
         path: arena_data/results/results.json
 
-    # Run 4) Upload victoria.pickle file
-    - name: Upload a victoria.pickle file
+    # Run 4) Upload victoria.pkl file
+    - name: Upload a victoria.pkl file
       uses: actions/upload-artifact@v2
       with:
-        name: victoria.pickle
-        path: ./victoria.pickle
+        name: victoria.pkl
+        path: ./victoria.pkl

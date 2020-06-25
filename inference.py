@@ -14,7 +14,7 @@ def main(question_fname):
     question = load_json(question_fname)
 
     print('Loading model...')
-    with open('victoria.pickle', 'rb') as f:
+    with open('victoria.pkl', 'rb') as f:
         model = pickle.load(f)
 
     print('Creating answers...')

@@ -70,9 +70,9 @@ def main(count, start):
 
     print('---------->>> Model Size ...')
     try:
-        print(os.path.getsize('victoria.pickle'))
+        print(os.path.getsize('victoria.pkl'))
     except OSError:
-        print('No victoria.pickle file')
+        print('No victoria.pkl file')
 
 
 if __name__ == '__main__':

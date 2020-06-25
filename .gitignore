@@ -4,4 +4,4 @@ arena_data
 .DS_Store
 __pycache__
 automate.csv
-victoria.pickle
+victoria.pkl
