@@ -33,7 +33,7 @@ class MatrixFactorization:
         user_tags_csr = user_item_csr
 
         print("Training song model...")
-        self._s_model.fit(user_song_csr.T * 160)
+        self._s_model.fit(user_song_csr.T * 150)
         print("Training tag model...")
         self._t_model.fit(user_tags_csr.T * 65)
 
