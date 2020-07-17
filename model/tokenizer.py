@@ -10,10 +10,35 @@ class Tokenizer:
         self._stopwords = ['말', '곡', '때', '음악', '노래',
                 'a', 'an', 'the', 'in', 'on', 'at', 'by', 'of']
 
+        # 대체어
+        self._alternative = [
+            ('k-pop', 'kpop'),
+            ('k팝', 'kpop'),
+            ('j-pop', 'jpop'),
+            ('r&b', 'rnb'),
+            ('알앤비', 'rnb'),
+            ('락', 'rock'),
+            ('재즈', 'jazz'),
+            ('째즈', 'jazz'),
+            ('힙합', 'hiphop'),
+            ('hip-hop', 'hiphop'),
+            ('hip-hap', 'hiphop'),
+            ('클래식', 'classic'),
+            ('발라드', ' 발라드 '),
+            ('라붐', 'laboum'),
+            ('뉴에이지', 'newage'),
+        ]
+
 
     def tokenize(self, sentence):
+        clean_sentence = sentence.lower()
+
+        # 대체어로 대체
+        for words in self._alternative:
+            clean_sentence = re.sub(words[0], words[1], clean_sentence)
+
         # 영어는 소문자로, 그리고 숫자/영어/한글을 제외한 특수문자 제거(ㅋ 포함)
-        clean_sentence = re.sub('[^0-9a-z가-힣]', ' ', sentence.lower())
+        clean_sentence = re.sub('[^0-9a-z가-힣]', ' ', clean_sentence)
 
         morphs = []
         try:
