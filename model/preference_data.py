@@ -163,6 +163,7 @@ class PreferenceData:
             for sid in p['songs']:
                 if s_counter[sid] > 3:
                     s_table.append((p['id'], sid, 1))
+                # 3 이하는 참조는 하는데, 추천은 하지 않음.
                 elif s_counter[sid] > 1:
                     e_table.append((p['id'], sid, 1))
 

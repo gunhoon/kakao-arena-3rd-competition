@@ -14,7 +14,7 @@ class Victoria:
 
 
     def fit(self, train, val):
-        self._find_issue_song(train)
+        self._find_issue_song(train, val)
 
         self._main_model.fit(train, val)
         self._fall_model.fit(train)
@@ -36,8 +36,8 @@ class Victoria:
 
 
     # 곡의 issue_date가 플레이리스트의 updt_date보다 늦은 곡 찾기
-    def _find_issue_song(self, train):
-        for p in train:
+    def _find_issue_song(self, train, val):
+        for p in train + val:
             updt_date = int(self._get_update_date(p))
 
             for sid in p['songs']:
