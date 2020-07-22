@@ -28,7 +28,7 @@ class MatrixFactorization:
 
         # set preference for song model
         df.loc[ (df['item_id'] >= 0) & (df['item_id'] < s_len), 'preference' ] = 1.0        # song
-        df.loc[ (df['item_id'] >= s_len) & (df['item_id'] < s_len + t_len), 'preference' ] = 0.8    # tag
+        df.loc[ (df['item_id'] >= s_len) & (df['item_id'] < s_len + t_len), 'preference' ] = 0.5    # tag
         df.loc[ (df['item_id'] >= s_len + t_len) & (df['item_id'] < s_len + t_len + k_len), 'preference' ] = 0.5    # keyword
         df.loc[ (df['item_id'] >= s_len + t_len + k_len) & (df['item_id'] < s_len + t_len + k_len + e_len), 'preference' ] = 1.0    # extension
         # user x item csr_matrix
@@ -39,7 +39,7 @@ class MatrixFactorization:
         # set preference for tag model
         df.loc[ (df['item_id'] >= 0) & (df['item_id'] < s_len), 'preference' ] = 1.0        # song
         df.loc[ (df['item_id'] >= s_len) & (df['item_id'] < s_len + t_len), 'preference' ] = 1.0    # tag
-        df.loc[ (df['item_id'] >= s_len + t_len) & (df['item_id'] < s_len + t_len + k_len), 'preference' ] = 0.5    # keyword
+        df.loc[ (df['item_id'] >= s_len + t_len) & (df['item_id'] < s_len + t_len + k_len), 'preference' ] = 1.0    # keyword
         df.loc[ (df['item_id'] >= s_len + t_len + k_len) & (df['item_id'] < s_len + t_len + k_len + e_len), 'preference' ] = 1.0    # extension
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
