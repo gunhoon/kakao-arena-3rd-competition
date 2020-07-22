@@ -23,6 +23,9 @@ class Victoria:
     def predict(self, playlist):
         s_pred, t_pred = self._main_model.predict(playlist)
 
+        s_pred.sort(key=lambda tup: tup[1], reverse=True)
+        t_pred.sort(key=lambda tup: tup[1], reverse=True)
+
         # fallback model
         if len(s_pred) == 0:
             s_pred, _ = self._fall_model.predict(playlist)

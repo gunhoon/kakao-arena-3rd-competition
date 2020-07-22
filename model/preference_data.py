@@ -48,7 +48,7 @@ class PreferenceData:
     def get_iid_to_sid(self, item_id):
         if item_id >= self._s_num:
             print('[ERROR] Invaild item_id of sid')
-        return self._iid_to_sid.get(item_id)
+        return int(self._iid_to_sid.get(item_id))
 
 
     def get_iid_to_tag(self, item_id):
