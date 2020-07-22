@@ -46,7 +46,7 @@ class Tokenizer:
                 morphs.extend(self._word_tokenize(word))
         except:
             morphs.clear()
-            print('[WARNING] Khaiii can not tokenize...({})'.format(sentence))
+            #print('[WARNING] Khaiii can not tokenize...({})'.format(sentence))
 
         # 불용어 제거
         keyword = {lex for lex, _ in morphs if not lex in self._stopwords}
