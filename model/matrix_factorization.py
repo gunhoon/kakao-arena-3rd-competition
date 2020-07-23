@@ -11,8 +11,8 @@ class MatrixFactorization:
         self._s_topk = song_topk
         self._t_topk = tag_topk
 
-        self._s_model = AlternatingLeastSquares(factors=100)
-        self._t_model = AlternatingLeastSquares(factors=100)
+        self._s_best = None
+        self._t_best = None
 
         self._data = PreferenceData(song_meta_json)
 
@@ -24,60 +24,47 @@ class MatrixFactorization:
         t_len = self._data.get_tag_length()
         k_len = self._data.get_keyword_length()
         e_len = self._data.get_extension_length()
-        val_len = self._data.get_val_length()
 
-        # set preference for song model
-        df.loc[ (df['item_id'] >= 0) & (df['item_id'] < s_len), 'preference' ] = 1.0        # song
-        df.loc[ (df['item_id'] >= s_len) & (df['item_id'] < s_len + t_len), 'preference' ] = 0.5    # tag
-        df.loc[ (df['item_id'] >= s_len + t_len) & (df['item_id'] < s_len + t_len + k_len), 'preference' ] = 0.5    # keyword
-        df.loc[ (df['item_id'] >= s_len + t_len + k_len) & (df['item_id'] < s_len + t_len + k_len + e_len), 'preference' ] = 1.0    # extension
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
         user_song_csr = user_item_csr[:, :s_len + t_len + k_len + e_len]
-
-
-        # set preference for tag model
-        df.loc[ (df['item_id'] >= 0) & (df['item_id'] < s_len), 'preference' ] = 1.0        # song
-        df.loc[ (df['item_id'] >= s_len) & (df['item_id'] < s_len + t_len), 'preference' ] = 1.0    # tag
-        df.loc[ (df['item_id'] >= s_len + t_len) & (df['item_id'] < s_len + t_len + k_len), 'preference' ] = 1.0    # keyword
-        df.loc[ (df['item_id'] >= s_len + t_len + k_len) & (df['item_id'] < s_len + t_len + k_len + e_len), 'preference' ] = 1.0    # extension
-        # user x item csr_matrix
-        user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
         user_tags_csr = user_item_csr
 
         print("Training song model...")
-        self._s_model.fit(user_song_csr.T * 160)
-        print("Training tag model...")
-        self._t_model.fit(user_tags_csr.T * 65)
+        s_model = AlternatingLeastSquares(factors=1350)
+        s_model.fit(user_song_csr.T * 160)
 
         # Configure song only model
-        self._s_model.user_factors = self._s_model.user_factors[:val_len]
-        self._s_model.item_factors = self._s_model.item_factors[:s_len]
+        s_model.user_factors = s_model.user_factors
+        s_model.item_factors = s_model.item_factors[:s_len]
+
+        self._s_best = s_model.recommend_all(user_song_csr[:, :s_len], N=self._s_topk)
+
+        print("Training tag model...")
+        t_model = AlternatingLeastSquares(factors=420)
+        t_model.fit(user_tags_csr.T * 65)
 
         # Configure tag only model
-        self._t_model.user_factors = self._t_model.user_factors[:val_len]
-        self._t_model.item_factors = self._t_model.item_factors[s_len:s_len + t_len]
+        t_model.user_factors = t_model.user_factors
+        t_model.item_factors = t_model.item_factors[s_len:s_len + t_len]
 
-        # model size를 줄이기 위해 학습 끝난 후에, song_meta를 메모리에서 해제함.
-        self._data.clear_song_meta()
+        self._t_best = t_model.recommend_all(user_tags_csr[:, s_len:s_len + t_len], N=self._t_topk)
 
 
     def predict(self, playlist):
         user_id = self._data.get_pid_to_uid(playlist['id'])
 
-        s_best = []
-        t_best = []
-        if user_id != None:
-            s_best = self._s_model.recommend(user_id, None, N=self._s_topk, filter_already_liked_items=False)
-            t_best = self._t_model.recommend(user_id, None, N=self._t_topk, filter_already_liked_items=False)
-
         s_len = self._data.get_song_length()
-        # s_best 는 (item_id, score)의 list, 이것을 (sid, score) 의 list로 변경
+
         s_pred = []
         t_pred = []
-        for item_id, score in s_best:
-            s_pred.append((self._data.get_iid_to_sid(item_id), score))
-        for item_id, score in t_best:
-            t_pred.append((self._data.get_iid_to_tag(item_id + s_len), score))
+
+        if user_id != None:
+            # s_best 는 (item_id, score)의 list, 이것을 (sid, score) 의 list로 변경
+            for i, item_id in enumerate(self._s_best[user_id]):
+                s_pred.append((self._data.get_iid_to_sid(int(item_id)), self._s_topk - i))
+
+            for i, item_id in enumerate(self._t_best[user_id]):
+                t_pred.append((self._data.get_iid_to_tag(int(item_id) + s_len), self._t_topk - i))
 
         return s_pred, t_pred
