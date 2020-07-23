@@ -12,9 +12,6 @@ class Victoria:
         self._issue_song = set() # 예외처리를 위해 발매일자가 잘못된 곡 저장
         self._issue_date = {song['id'] : song['issue_date'] for song in song_meta_json}
 
-        self._album_id = {song['id'] : song['album_id'] for song in song_meta_json}
-        self._artist_id = {song['id'] : song['artist_id_basket'] for song in song_meta_json}
-
 
     def fit(self, train, val):
         self._find_issue_song(train, val)
@@ -25,8 +22,6 @@ class Victoria:
 
     def predict(self, playlist):
         s_pred, t_pred = self._main_model.predict(playlist)
-
-        s_pred = self._set_song_weight(s_pred, playlist)
 
         s_pred.sort(key=lambda tup: tup[1], reverse=True)
         t_pred.sort(key=lambda tup: tup[1], reverse=True)
@@ -41,38 +36,6 @@ class Victoria:
         t_rec = [k for k, v in t_pred]
 
         return s_rec, t_rec
-
-    # 가중치 함수
-    def _set_song_weight(self, s_pred, playlist):
-        w_pred = []
-
-        album_c = Counter()
-        artist_c = Counter()
-
-        for sid in playlist['songs']:
-            album_c.update([self._album_id[sid]])
-            artist_c.update(self._artist_id[sid])
-
-        album_dict = dict(album_c)
-        artist_dict = dict(artist_c)
-
-        for sid, score in s_pred:
-            album_weight = album_dict.get(self._album_id[sid])
-            if album_weight == None:
-                album_weight = 0
-
-            artist_weight = 0
-            for artist_id in self._artist_id[sid]:
-                weight = artist_dict.get(artist_id)
-                if weight == None:
-                    weight = 0
-                if weight > artist_weight:
-                    artist_weight = weight
-
-            new_score = score + (album_weight + artist_weight) * 0.1
-            w_pred.append((sid, new_score))
-
-        return w_pred
 
 
     # 곡의 issue_date가 플레이리스트의 updt_date보다 늦은 곡 찾기
