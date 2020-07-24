@@ -28,26 +28,19 @@ class MatrixFactorization:
 
     def _fit_for_song(self, train, val):
         df = self._s_data.get_preference(train, val)
-
         s_len = self._s_data.get_song_length()
-        t_len = self._s_data.get_tag_length()
-        k_len = self._s_data.get_keyword_length()
-        e_len = self._s_data.get_extension_length()
 
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
-        user_song_csr = user_item_csr[:, :s_len + t_len + k_len + e_len]
-        user_tags_csr = user_item_csr
 
-        print("Training song model...")
         s_model = AlternatingLeastSquares(factors=1350)
-        s_model.fit(user_song_csr.T * 160)
+        s_model.fit(user_item_csr.T * 160)
 
         # Configure song only model
-        s_model.user_factors = s_model.user_factors
         s_model.item_factors = s_model.item_factors[:s_len]
 
-        self._s_best = s_model.recommend_all(user_song_csr[:, :s_len], N=self._s_topk)
+        user_song_csr = user_item_csr[:, :s_len]
+        self._s_best = s_model.recommend_all(user_song_csr, N=self._s_topk)
 
 
     def _fit_for_tag(self, train, val):
@@ -79,10 +72,7 @@ class MatrixFactorization:
         t_pred = []
 
         user_id = self._s_data.get_pid_to_uid(playlist['id'])
-        s_len = self._s_data.get_song_length()
-
         if user_id != None:
-            # s_best 는 (item_id, score)의 list, 이것을 (sid, score) 의 list로 변경
             for i, item_id in enumerate(self._s_best[user_id]):
                 s_pred.append((self._s_data.get_iid_to_sid(int(item_id)), self._s_topk - i))
 
