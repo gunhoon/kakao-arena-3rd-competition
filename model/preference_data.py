@@ -197,13 +197,13 @@ class PreferenceData:
             # tags
             for tag in p['tags']:
                 if t_counter[tag] > 1:
-                    t_table.append((p['id'], tag, 1))
+                    t_table.append((p['id'], tag, 0.5))
 
             # keyword
             if len(p['plylst_title']) > 0:
                 keyword = api.tokenize(p['plylst_title'])
                 for k in keyword:
-                    k_table.append((p['id'], k, 1))
+                    k_table.append((p['id'], k, 0.5))
 
             # detail genre
             gnr = self._get_dtl_genre(p['songs'])
@@ -225,11 +225,11 @@ class PreferenceData:
         for p in tqdm(playlists):
             # songs
             for sid in p['songs']:
-                if s_counter[sid] > 1:
+                if s_counter[sid] > 3:
                     s_table.append((p['id'], sid, 1))
                 # 3 이하는 참조는 하는데, 추천은 하지 않음.
-                #elif s_counter[sid] > 1:
-                #    e_table.append((p['id'], sid, 1))
+                elif s_counter[sid] > 1:
+                    e_table.append((p['id'], sid, 1))
 
             # tags
             for tag in p['tags']:
