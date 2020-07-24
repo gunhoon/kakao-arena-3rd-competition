@@ -45,26 +45,19 @@ class MatrixFactorization:
 
     def _fit_for_tag(self, train, val):
         df = self._t_data.get_preference(train, val)
-
-        s_len = self._t_data.get_song_length()
         t_len = self._t_data.get_tag_length()
-        k_len = self._t_data.get_keyword_length()
-        e_len = self._t_data.get_extension_length()
 
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
-        user_song_csr = user_item_csr[:, :s_len + t_len + k_len + e_len]
-        user_tags_csr = user_item_csr
 
-        print("Training tag model...")
         t_model = AlternatingLeastSquares(factors=420)
-        t_model.fit(user_tags_csr.T * 65)
+        t_model.fit(user_item_csr.T * 65)
 
         # Configure tag only model
-        t_model.user_factors = t_model.user_factors
-        t_model.item_factors = t_model.item_factors[s_len:s_len + t_len]
+        t_model.item_factors = t_model.item_factors[:t_len]
 
-        self._t_best = t_model.recommend_all(user_tags_csr[:, s_len:s_len + t_len], N=self._t_topk)
+        user_tags_csr = user_item_csr[:, :t_len]
+        self._t_best = t_model.recommend_all(user_tags_csr, N=self._t_topk)
 
 
     def predict(self, playlist):
@@ -76,12 +69,9 @@ class MatrixFactorization:
             for i, item_id in enumerate(self._s_best[user_id]):
                 s_pred.append((self._s_data.get_iid_to_sid(int(item_id)), self._s_topk - i))
 
-
         user_id = self._t_data.get_pid_to_uid(playlist['id'])
-        s_len = self._t_data.get_song_length()
-
         if user_id != None:
             for i, item_id in enumerate(self._t_best[user_id]):
-                t_pred.append((self._t_data.get_iid_to_tag(int(item_id) + s_len), self._t_topk - i))
+                t_pred.append((self._t_data.get_iid_to_tag(int(item_id)), self._t_topk - i))
 
         return s_pred, t_pred
