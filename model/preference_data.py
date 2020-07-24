@@ -14,7 +14,6 @@ class PreferenceData:
         self._s_num = 0
         self._t_num = 0
         self._k_num = 0
-        self._e_num = 0
 
         self._iid_to_sid = {}   # item_id to song_id
         self._iid_to_tag = {}   # item_id to tag
@@ -29,9 +28,6 @@ class PreferenceData:
 
     def get_keyword_length(self):
         return self._k_num
-
-    def get_extension_length(self):
-        return self._e_num
 
 
     def get_iid_to_sid(self, item_id):
@@ -110,20 +106,18 @@ class PreferenceData:
 
 
     def _get_preference_for_tag(self, train, val):
-        s_table, t_table, k_table, e_table, g_table = \
+        s_table, t_table, k_table, g_table = \
                 self._preference_table_for_tag(train + val)
 
-        # tag, song, keyword, extenstion, genre
+        # tag, song, keyword, genre
         t_df = pd.DataFrame(t_table, columns =['plylst_id', 'tag', 'preference'])
         s_df = pd.DataFrame(s_table, columns =['plylst_id', 'sid', 'preference'])
         k_df = pd.DataFrame(k_table, columns =['plylst_id', 'key', 'preference'])
-        e_df = pd.DataFrame(e_table, columns =['plylst_id', 'ext', 'preference'])
         g_df = pd.DataFrame(g_table, columns =['plylst_id', 'gnr', 'preference'])
 
         t_df['item_id'] = t_df['tag'].astype('category').cat.codes
         s_df['item_id'] = s_df['sid'].astype('category').cat.codes
         k_df['item_id'] = k_df['key'].astype('category').cat.codes
-        e_df['item_id'] = e_df['ext'].astype('category').cat.codes
         g_df['item_id'] = g_df['gnr'].astype('category').cat.codes
 
         # item_id에서 sid를 찾기 위한 dictionary 생성
@@ -138,15 +132,13 @@ class PreferenceData:
         self._t_num = t_df['item_id'].nunique()
         self._s_num = s_df['item_id'].nunique()
         self._k_num = k_df['item_id'].nunique()
-        self._e_num = e_df['item_id'].nunique()
 
         # song의 item_id는 tag의 item_id 이후 번호 부터 부여한다.
         s_df['item_id'] = s_df['item_id'] + self._t_num
         k_df['item_id'] = k_df['item_id'] + self._t_num + self._s_num
-        e_df['item_id'] = e_df['item_id'] + self._t_num + self._s_num + self._k_num
-        g_df['item_id'] = g_df['item_id'] + self._t_num + self._s_num + self._k_num + self._e_num
+        g_df['item_id'] = g_df['item_id'] + self._t_num + self._s_num + self._k_num
 
-        df = pd.concat([t_df, s_df, k_df, e_df, g_df])
+        df = pd.concat([t_df, s_df, k_df, g_df])
 
         df['user_id'] = df['plylst_id'].astype('category').cat.codes
 
@@ -197,7 +189,6 @@ class PreferenceData:
         s_table = []
         t_table = []
         k_table = []
-        e_table = []
         g_table = []
 
         # 빈도가 적은 것은 feature에서 제거하기 위한 counter
@@ -213,11 +204,8 @@ class PreferenceData:
         for p in tqdm(playlists):
             # songs
             for sid in p['songs']:
-                if s_c[sid] > 3:
+                if s_c[sid] > 1:
                     s_table.append((p['id'], sid, 1))
-                # 3 이하는 참조는 하는데, 추천은 하지 않음.
-                elif s_c[sid] > 1:
-                    e_table.append((p['id'], sid, 1))
 
             # tags
             for tag in p['tags']:
@@ -235,7 +223,7 @@ class PreferenceData:
             for k, v in gnr:
                 g_table.append((p['id'], k, v))
 
-        return s_table, t_table, k_table, e_table, g_table
+        return s_table, t_table, k_table, g_table
 
 
     def _get_dtl_genre(self, songs):
