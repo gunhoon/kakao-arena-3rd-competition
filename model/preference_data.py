@@ -2,12 +2,13 @@ import pandas as pd
 from collections import Counter
 from tqdm import tqdm
 
-from model.song_meta import SongMeta
 from model.tokenizer import Tokenizer
 
 
 class PreferenceData:
-    def __init__(self, song_meta_json):
+    def __init__(self, song_meta):
+        self._song_meta = song_meta
+
         self._s_num = 0
         self._t_num = 0
         self._k_num = 0
@@ -16,8 +17,6 @@ class PreferenceData:
         self._iid_to_sid = {}   # item_id to song_id
         self._iid_to_tag = {}   # item_id to tag
         self._pid_to_uid = {}   # plylst_id to user_id
-
-        self._meta = SongMeta(song_meta_json)
 
 
     def get_song_length(self):
@@ -140,8 +139,18 @@ class PreferenceData:
                     k_table.append((p['id'], k, 1))
 
             # detail genre
-            gnr = self._meta.get_dtl_genre(p['songs'])
+            gnr = self._get_dtl_genre(p['songs'])
             for k, v in gnr:
                 g_table.append((p['id'], k, v))
 
         return s_table, t_table, k_table, e_table, g_table
+
+
+    def _get_dtl_genre(self, songs):
+        c = Counter()
+
+        for sid in songs:
+            value = self._song_meta[sid]['song_gn_dtl_gnr_basket']
+            c.update(value)
+
+        return c.items()

@@ -14,6 +14,7 @@ def main(song_meta_fname, train_fname, val_fname, test_fname, question_fname):
     train = load_json(train_fname)
 
     # 규정이 변경되어, val.json, test.json 모두 loading함.
+    # https://arena.kakao.com/forum/notice?id=296
     print('Loading val file...')
     val = load_json(val_fname)
 

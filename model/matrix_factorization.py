@@ -7,14 +7,14 @@ from model.preference_data import PreferenceData
 
 # Matrix Factorization using implicit library
 class MatrixFactorization:
-    def __init__(self, song_meta_json, song_topk, tag_topk):
+    def __init__(self, song_meta, song_topk, tag_topk):
         self._s_topk = song_topk
         self._t_topk = tag_topk
 
         self._s_best = None
         self._t_best = None
 
-        self._data = PreferenceData(song_meta_json)
+        self._data = PreferenceData(song_meta)
 
 
     def fit(self, train, val):

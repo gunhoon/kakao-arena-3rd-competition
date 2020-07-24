@@ -6,11 +6,13 @@ from model.matrix_factorization import MatrixFactorization
 
 class Victoria:
     def __init__(self, song_meta_json, song_topk=500, tag_topk=20):
-        self._main_model = MatrixFactorization(song_meta_json, song_topk, tag_topk)
+        self._song_meta = {song['id'] : song for song in song_meta_json}
+
+        self._main_model = MatrixFactorization(self._song_meta, song_topk, tag_topk)
         self._fall_model = Fallback(song_topk, tag_topk)
 
-        self._issue_song = set() # 예외처리를 위해 발매일자가 잘못된 곡 저장
-        self._issue_date = {song['id'] : song['issue_date'] for song in song_meta_json}
+        # 예외처리를 위해 발매일자가 잘못된 곡 저장
+        self._issue_song = set()
 
 
     def fit(self, train, val):
@@ -44,7 +46,7 @@ class Victoria:
             updt_date = int(self._get_update_date(p))
 
             for sid in p['songs']:
-                if int(self._issue_date[sid]) > updt_date:
+                if int(self._song_meta[sid]['issue_date']) > updt_date:
                     self._issue_song.add(sid)
 
 
@@ -55,7 +57,7 @@ class Victoria:
         updt_date = int(self._get_update_date(playlist))
 
         for sid, _ in s_pred:
-            if int(self._issue_date[sid]) > updt_date and sid not in self._issue_song:
+            if int(self._song_meta[sid]['issue_date']) > updt_date and sid not in self._issue_song:
                 s_tmp.append(sid)
             else:
                 s_rec.append(sid)
