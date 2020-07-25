@@ -8,6 +8,9 @@ class Victoria:
     def __init__(self, song_meta_json, song_topk=800, tag_topk=80):
         self._song_meta = {song['id'] : song for song in song_meta_json}
 
+        self._s_topk = song_topk
+        self._t_topk = tag_topk
+
         self._main_model = MatrixFactorization(self._song_meta, song_topk, tag_topk)
         self._fall_model = Fallback(song_topk, tag_topk)
 
@@ -25,6 +28,9 @@ class Victoria:
     def predict(self, playlist):
         s_pred, t_pred = self._main_model.predict(playlist)
 
+        # MF된 결과에서 후처리를 하기 위해.
+        s_pred = self._shift_position_song(s_pred, playlist)
+
         s_pred.sort(key=lambda tup: tup[1], reverse=True)
         t_pred.sort(key=lambda tup: tup[1], reverse=True)
 
@@ -38,6 +44,42 @@ class Victoria:
         t_rec = [k for k, v in t_pred]
 
         return s_rec, t_rec
+
+
+    def _shift_position_song(self, s_pred, playlist):
+        shifted_pred = []
+
+        album_c = Counter()
+        artist_c = Counter()
+
+        for sid in playlist['songs']:
+            album_c.update([self._song_meta[sid]['album_id']])
+            artist_c.update(self._song_meta[sid]['artist_id_basket'])
+
+        top_album = album_c.most_common(1)
+        top_artist = artist_c.most_common(1)
+
+        for sid, score in s_pred:
+            shift_count = 0
+
+            # playlist에 TOP 앨법의 곡이 5개 이상이면, 그 앨범의 모든 곡의 가중치를 높혀서
+            # results.json 파일에서 앞쪽으로 배치시키기 위한 로직.
+            if len(top_album) > 0 and top_album[0][0] == self._song_meta[sid]['album_id']:
+                if top_album[0][1] > 4:
+                    shift_count += self._s_topk
+
+            # playlist에 특정 artist의 곡이 20개 이상이면, 그 artist의 모든 곡의 가중치를 높혀서
+            # results.json 파일에서 앞쪽으로 배치시키기 위한 로직.
+            # 또한, 10개 이상이면 100 칸 정도만 이동시킴.
+            if len(top_artist) > 0 and top_artist[0][0] in self._song_meta[sid]['artist_id_basket']:
+                if top_artist[0][1] > 19:
+                    shift_count += self._s_topk
+                elif top_artist[0][1] > 9:
+                    shift_count += 100
+
+            shifted_pred.append((sid, score + shift_count))
+
+        return shifted_pred
 
 
     # 곡의 issue_date가 플레이리스트의 updt_date보다 늦은 곡 찾기
