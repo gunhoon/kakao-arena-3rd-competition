@@ -15,10 +15,10 @@ class Victoria:
         self._issue_song = set()
 
 
-    def fit(self, train, val):
-        self._find_issue_song(train, val)
+    def fit(self, train, val, extra_train):
+        self._find_issue_song(train + extra_train, val)
 
-        self._main_model.fit(train, val)
+        self._main_model.fit(train, val, extra_train)
         self._fall_model.fit(train)
 
 

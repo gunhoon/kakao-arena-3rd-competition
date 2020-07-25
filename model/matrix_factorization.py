@@ -18,11 +18,12 @@ class MatrixFactorization:
         self._t_data = PreferenceData(song_meta, song_type=False)
 
 
-    def fit(self, train, val):
-        print("Training song model...")
-        self._fit_for_song(train, val)
+    def fit(self, train, val, extra_train):
+        print('---> Starting the training for song...')
+        # extra_train는 song에서만 사용함. tag에서 사용하면 성능 더 떨어짐.
+        self._fit_for_song(train + extra_train, val)
 
-        print("Training tag model...")
+        print('---> Starting the training for tag...')
         self._fit_for_tag(train, val)
 
 
