@@ -5,7 +5,7 @@ from model.matrix_factorization import MatrixFactorization
 
 
 class Victoria:
-    def __init__(self, song_meta_json, song_topk=500, tag_topk=20):
+    def __init__(self, song_meta_json, song_topk=800, tag_topk=80):
         self._song_meta = {song['id'] : song for song in song_meta_json}
 
         self._main_model = MatrixFactorization(self._song_meta, song_topk, tag_topk)

@@ -33,7 +33,7 @@ class MatrixFactorization:
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
 
-        s_model = AlternatingLeastSquares(factors=1350)
+        s_model = AlternatingLeastSquares(factors=1600)
         s_model.fit(user_item_csr.T * 160)
 
         # Configure song only model
@@ -50,7 +50,7 @@ class MatrixFactorization:
         # user x item csr_matrix
         user_item_csr = sparse.csr_matrix((df['preference'].astype(float), (df['user_id'], df['item_id'])))
 
-        t_model = AlternatingLeastSquares(factors=420)
+        t_model = AlternatingLeastSquares(factors=1200)
         t_model.fit(user_item_csr.T * 65)
 
         # Configure tag only model
