@@ -1,3 +1,4 @@
+import re
 from collections import Counter
 
 from model.fallback import Fallback
@@ -25,6 +26,8 @@ class Victoria:
     def predict(self, playlist):
         s_pred, t_pred = self._main_model.predict(playlist)
 
+        t_pred = self._shift_position_tag(t_pred, playlist)
+
         s_pred.sort(key=lambda tup: tup[1], reverse=True)
         t_pred.sort(key=lambda tup: tup[1], reverse=True)
 
@@ -38,6 +41,19 @@ class Victoria:
         t_rec = [k for k, v in t_pred]
 
         return s_rec, t_rec
+
+
+    def _shift_position_tag(self, t_pred, playlist):
+        shifted_pred = []
+
+        for tag, score in t_pred:
+            if len(playlist['plylst_title']) > 0:
+                if re.search(tag, playlist['plylst_title']):
+                    score += 30
+
+            shifted_pred.append((tag, score))
+
+        return shifted_pred
 
 
     # 곡의 issue_date가 플레이리스트의 updt_date보다 늦은 곡 찾기
